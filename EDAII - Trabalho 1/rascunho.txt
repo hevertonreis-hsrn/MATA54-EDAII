@@ -8,47 +8,31 @@
 
 typedef struct nodo
 {
-    int numChaves;                          // Quantidade atual de chaves
-    bool ehFolha;                           // Se TRUE indica que o nó é uma folha
-    int chaves[2 * FATOR_CONJSEQ - 1];      // Vetor de chaves
-    struct nodo *filhos[2 * FATOR_CONJSEQ]; // Vetor de filhos
+    int numChaves;                          // quantidade atual de chaves
+    bool ehFolha;                           // se TRUE indica que o nó é uma folha
+    int chaves[2 * FATOR_CONJSEQ - 1];      // vetor de chaves
+    struct nodo *filhos[2 * FATOR_CONJSEQ]; // vetor de filhos
 
 } nodo;
 
-nodo* criarNodo() { // Metodo para criar um nodo basico
+nodo* criarArvore() {
 
-    nodo *x = (nodo *)malloc(sizeof(nodo)); 
+    //FILE *arquivo;
+    //arquivo = fopen("arvoreB","wb");
+
+    //if (arquivo == NULL){
+    //    printf("Erro ao abrir o arquivo!");
+    //    exit(-1);
+    //}
+
+    nodo *x = (nodo*)malloc(sizeof(nodo)); 
     x->ehFolha = true;
     x->numChaves = 0;
 
+    //fwrite (&x, sizeof(nodo), 1, arquivo);
+    //fclose(arquivo);
+
     return x;
-}
-
-void imprimirArvore(nodo *arvore, int nivel){
-
-    int i;
-
-    for (i = 0; i < nivel; i++)
-    {
-        printf("    ");
-    }
-    
-    printf("|");
-    for (i = 0; i < arvore->numChaves; i++)
-    {
-        printf("%d|", arvore->chaves[i]);
-    }
-    printf("\n");
-
-    for (i = 0; i <= arvore->numChaves; i++)
-    {
-        if (arvore->ehFolha == false)
-        {
-            imprimirArvore(arvore->filhos[i], nivel + 1);
-        }
-        
-    }
-    
 }
 
 nodo* dividirFilhos(nodo *x, int i, nodo *y){
@@ -64,7 +48,7 @@ nodo* dividirFilhos(nodo *x, int i, nodo *y){
         z->chaves[j] = y->chaves[j+FATOR_CONJSEQ];
     }
     
-    if (y->ehFolha == false)  // se y nao for uma folha, transefere seus filhos para z
+    if (!y->ehFolha)  // se y nao for uma folha, transefere seus filhos para z
     {
         for (int j = 0; j < FATOR_CONJSEQ; j++)
         {
@@ -96,7 +80,7 @@ nodo* inserirNodoNaoCheio(nodo *x, int chave){
 
     int i = x->numChaves;
 
-    if (x->ehFolha == true)
+    if (x->ehFolha)
     {
         while (i >= 0 && chave < x->chaves[i]) // desloca as chaves existentes para alocar a nova chave a esquerda
         {
@@ -139,7 +123,7 @@ nodo* inserirNodo(nodo *raiz, int chave){
 
     if (r->numChaves == (2 * FATOR_CONJSEQ - 1)) // se r estiver cheio, cria um novo nodo 
     {
-        nodo *s = criarNodo();
+        nodo *s = criarArvore();
         s->ehFolha = false;
         s->numChaves = 0;
         s->filhos[0] = r;
@@ -155,6 +139,15 @@ nodo* inserirNodo(nodo *raiz, int chave){
 
 nodo* buscar(nodo *x, int chave){
 
+    //nodo r;
+    //FILE *arquivo;
+    //arquivo = fopen("arvoreB","wb");
+
+    //if (arquivo == NULL){
+    //    printf("Erro ao abrir o arquivo!");
+    //    exit(-1);
+    //}
+
     int i = 0;
 
     while (i <= x->numChaves && chave > x->chaves[i])
@@ -166,12 +159,13 @@ nodo* buscar(nodo *x, int chave){
     {
         return x;
     }
-    else if (x->ehFolha == true)
+    else if (x->ehFolha)
     {
         return NULL;
     }
     else 
     {
+        //fread (&r, sizeof (nodo), 1, arquivo);
         return buscar(x->filhos[i], chave);
     }
     
@@ -182,7 +176,7 @@ int main(){
     char comando;
     int chave = 0;
 
-    nodo *arvore = criarNodo();
+    nodo *arvore = criarArvore();
 
     printf("Rodando...\n");
     printf("Insira um comando...\n");
@@ -209,12 +203,6 @@ int main(){
             }
                         
         }
-
-        if (comando == 'p')
-        {
-            imprimirArvore(arvore, 0);
-        }
-        
         
     }
 }
