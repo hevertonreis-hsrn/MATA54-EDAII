@@ -15,26 +15,49 @@ typedef struct {
 
 int lerArquivo (FILE *file){
 
-	Registro registro;
-    int posicao;
+	FILE *f = file;
 
-	for (int i=0; i < MTAMARQUIVO; i++) {
+	int i;
+	Registro r;
+	fseek (file, 0, SEEK_SET);
+	
+	for (i=0; i < MTAMARQUIVO; i++) {
 
-		fread (&registro, sizeof (Dados), 1, file);
+		long offset = ftell(file);
+
+		fread (&r, sizeof (Registro), 1, f);
 
 		printf ("Registro: %d\n", i);
-
-		if (registro.ocupado == true) {
-
+		if (r.ocupado == true) {
 			printf ("Ocupado: sim\n");
-			printf ("Chave: %d\n", registro.dados.chave);
-
+			printf ("Chave: %d\n", r.dados.chave);
+			printf ("Offset: %d\n", offset);
 		} else
-
 			printf ("Ocupado: nao\n");
-
 		printf("\n");
 	}
+}
+
+int lerArquivoNaPosicao (FILE *file, long p){
+
+	FILE *f = file;
+
+	int i;
+	long posicao = p;
+	Registro r;
+	fseek (file, posicao, SEEK_SET);
+
+	long offset = ftell(file);
+
+	fread (&r, sizeof (Registro), 1, f);
+
+	if (r.ocupado == true) {
+		printf ("Ocupado: sim\n");
+		printf ("Chave: %d\n", r.dados.chave);
+		printf ("Offset: %d\n", offset);
+	} else
+		printf ("Ocupado: nao\n");
+		printf("\n");
 }
 
 int gravarArquivo(FILE *file){
@@ -62,7 +85,7 @@ int gravarArquivo(FILE *file){
 int main() {
 
     FILE *file = NULL; //Aloca estrutura de dados para manipulação de arquivos
-    file = fopen("file.txt","r+"); //Abre o arquivo "file.txt" em modo de leitura ("r", do ingles "read")
+    file = fopen("file","r+"); //Abre o arquivo "file.txt" em modo de leitura ("r", do ingles "read")
 
     if (file == NULL) //Verifica se o arquivo foi aberto corretamente
     {
@@ -70,25 +93,34 @@ int main() {
 		exit(-1);
     }
 
-	//gravarArquivo(file);
-	lerArquivo(file);
-/*
-    Registro registro;
-	registro.ocupado = false;
-    int posicao;
+	char comando;
+	gravarArquivo(file);
 	
-	printf("Informe um valor para a chave (apenas numeros): ");
-	scanf("%d",&(registro.dados.chave));
-	printf("Informe a posicao no arquivo onde deseja inserir os dados: ");
-	scanf("%d",&posicao);
+	printf("Rodando...\n");
+    printf("Insira um comando...\n");
+    while(comando != 'e'){
 
-    printf("Armazenando registro no arquivo ...\n");
-	fseek(file, posicao*sizeof(Dados), SEEK_SET);
+        scanf(" %c", &comando);
+
+        if (comando == 'g')
+        {
+            gravarArquivo(file);
+		}
+
+		if (comando == 'l')
+        {
+            lerArquivo(file);
+		}
+
+		if (comando == 'p')
+		{
+			printf("Indique a posicao do arquivo...\n");
+			long p;
+			scanf("%d", &p);
+			lerArquivoNaPosicao(file,p);
+		}
 		
-	if (fwrite(&registro, sizeof(Dados), 1, file) == 1)
-		printf("Registro armazenado com sucesso\n");
-	else
-		printf("Erro no armazenamento do registro\n");
-*/
+	}
+	
 	fclose(file);
 }
