@@ -2,7 +2,7 @@
 #include<stdlib.h>
 #include<stdbool.h>
 
-#define MTAMARQUIVO 10
+#define MTAMARQUIVO 15
 
 typedef struct {
 	int chave;
@@ -10,6 +10,7 @@ typedef struct {
 
 typedef struct {
 	bool ocupado;
+	long posicao;
 	Dados dados;
 } Registro;
 
@@ -55,6 +56,7 @@ int lerArquivoNaPosicao (FILE *file, long p){
 		printf ("Ocupado: sim\n");
 		printf ("Chave: %d\n", r.dados.chave);
 		printf ("Offset: %d\n", offset);
+		printf ("Posicao: %d\n", r.posicao);
 	} else
 		printf ("Ocupado: nao\n");
 		printf("\n");
@@ -74,7 +76,9 @@ int gravarArquivo(FILE *file){
     printf("Armazenando registro no arquivo ...\n");
 	registro.ocupado = true;
 
-	fseek(file, posicao*sizeof(Registro), SEEK_SET);
+	fseek(file, 0, SEEK_END);
+	long offset = ftell(file);
+	registro.posicao = offset;
 
 	if (fwrite (&registro, sizeof(Registro), 1, file) == 1)
 		printf("Registro armazenado com sucesso\n");
