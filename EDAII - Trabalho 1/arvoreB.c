@@ -3,40 +3,16 @@
 #include <string.h>
 #include <stdbool.h>
 
-#define GRAU_MINIMO_INDICE 3
-#define FATOR_CONJSEQ 2
+#include "arvore.h"
+#include "gerenciador.c"
+#include "registro.h"
 
-typedef struct nodo
-{
-    long posicao;                           // Posicao deste Nodo no arquivo
-    int numChaves;                          // Quantidade atual de chaves
-    bool ehFolha;                           // Se TRUE indica que o nó é uma folha
-    int chaves[2 * FATOR_CONJSEQ - 1];      // Vetor de chaves
-    long filhos[2 * FATOR_CONJSEQ];         // Vetor de filhos
-} Nodo;
-
-typedef struct header
-{
-    long posNodoRaiz;                       // Posicao do Nodo raiz
-} Header;
-
-FILE* abrirArquivo(){
-
-    FILE *arquivo = NULL; // Aloca estrutura de dados para manipulação de arquivos
-    arquivo = fopen("arvoreB","r+"); // Abre o arquivo "arvoreB" em modo de leitura ("r", do ingles "read")
-
-    if (arquivo == NULL) // Verifica se o arquivo foi aberto corretamente
-    {
-        printf("Erro na abertura do arquivo - Programa abortado!\n");
-		exit(-1);
-    }
-
-    return arquivo;
-}
+#define ARQARVORE "arvoreB"
+#define ARQREG "arquivoPrincipal"
 
 long buscar(long posicaoRaiz, int chave){ // Metodo para buscar chaves em um Nodo  
 
-    FILE *arqB = abrirArquivo();
+    FILE *arqB = abrirArquivo(ARQARVORE);
     Nodo x;
     fseek (arqB, posicaoRaiz, SEEK_SET);
     fread (&x, sizeof (Nodo), 1, arqB);
@@ -50,7 +26,7 @@ long buscar(long posicaoRaiz, int chave){ // Metodo para buscar chaves em um Nod
         i++;
     }
 
-    if (x.chaves[i] == chave) // Se a chave procurada esta neste Nodo, retorna o Nodo
+    if (x.chaves[i] == chave) // Se a chave procurada esta neste Nodo, retorna a posicao
     {
         return x.posicao;
     }
@@ -60,7 +36,7 @@ long buscar(long posicaoRaiz, int chave){ // Metodo para buscar chaves em um Nod
     }
     else // Inicia o processo de busca nos filhos deste Nodo
     {
-        FILE *arqB2 = abrirArquivo();
+        FILE *arqB2 = abrirArquivo(ARQARVORE);
         Nodo filho;
         fseek(arqB2, x.filhos[i], SEEK_SET);
         fread(&filho, sizeof(Nodo), 1, arqB2);
@@ -75,7 +51,7 @@ long buscar(long posicaoRaiz, int chave){ // Metodo para buscar chaves em um Nod
 long criarNodo() { // Metodo para criar um Nodo basico
 
     long posicao = 0;
-    FILE *arq = abrirArquivo();
+    FILE *arq = abrirArquivo(ARQARVORE);
 
     Nodo x;
     x.ehFolha = true;
@@ -111,7 +87,7 @@ void dividirFilhos(long posicaoRaiz, int i){
 
     printf("Entrando no metodo dividirFilhos...\n");
 
-    FILE *arqX = abrirArquivo();
+    FILE *arqX = abrirArquivo(ARQARVORE);
     Nodo x;
     fseek (arqX, posicaoRaiz, SEEK_SET);
     fread (&x, sizeof (Nodo), 1, arqX);
@@ -119,14 +95,14 @@ void dividirFilhos(long posicaoRaiz, int i){
     free(arqX);
 
     long posNodoZ = criarNodo(); // Cria um novo Nodo z
-    FILE *arqZ = abrirArquivo();
+    FILE *arqZ = abrirArquivo(ARQARVORE);
     Nodo z;
     fseek (arqZ, posNodoZ, SEEK_SET);
     fread (&z, sizeof (Nodo), 1, arqZ);
     fclose(arqZ);
     free(arqZ);                       
 
-    FILE *arqY = abrirArquivo();
+    FILE *arqY = abrirArquivo(ARQARVORE);
     Nodo y;                              // Realiza a leitura do i-ezimo filho de x como um Nodo y
     fseek (arqY, x.filhos[i], SEEK_SET);
     fread (&y, sizeof (Nodo), 1, arqY);
@@ -168,7 +144,7 @@ void dividirFilhos(long posicaoRaiz, int i){
     x.chaves[i] = y.chaves[FATOR_CONJSEQ-1]; // Copia a chave do meio de y para x
     x.numChaves = x.numChaves + 1; // Aumenta a contagem de chaves de x
 
-    FILE *arqX2 = abrirArquivo();
+    FILE *arqX2 = abrirArquivo(ARQARVORE);
     fseek (arqX2, x.posicao, SEEK_SET); // Realiza o salvamento das alteracoes do Nodo x no arquivo
     if (fwrite (&x, sizeof(Nodo), 1, arqX2) == 1)
 		printf("Registro x armazenado com sucesso\n");
@@ -177,7 +153,7 @@ void dividirFilhos(long posicaoRaiz, int i){
     fclose(arqX2);
     free(arqX2);
 
-    FILE *arqY2 = abrirArquivo();
+    FILE *arqY2 = abrirArquivo(ARQARVORE);
     fseek (arqY2, y.posicao, SEEK_SET); // Realiza o salvamento das alteracoes do Nodo y no arquivo
     if (fwrite (&y, sizeof(Nodo), 1, arqY2) == 1)
 		printf("Registro y armazenado com sucesso\n");
@@ -186,7 +162,7 @@ void dividirFilhos(long posicaoRaiz, int i){
     fclose(arqY2);
     free(arqY2);
 
-    FILE *arqZ2 = abrirArquivo();
+    FILE *arqZ2 = abrirArquivo(ARQARVORE);
     fseek (arqZ2, z.posicao, SEEK_SET); // Realiza o salvamento das alteracoes do Nodo z no arquivo
     if (fwrite (&z, sizeof(Nodo), 1, arqZ2) == 1)
 		printf("Registro z armazenado com sucesso\n");
@@ -197,11 +173,11 @@ void dividirFilhos(long posicaoRaiz, int i){
 
 }
 
-void inserirNodoNaoCheio(long posicaoRaiz, int chave){
+long inserirNodoNaoCheio(long posicaoRaiz, int chave){
 
     printf("Entrando no metodo inserirNodoNaoCheio...\n");
 
-    FILE *arqX = abrirArquivo();
+    FILE *arqX = abrirArquivo(ARQARVORE);
     Nodo x;
     fseek (arqX, posicaoRaiz, SEEK_SET);
     fread (&x, sizeof (Nodo), 1, arqX);
@@ -212,16 +188,33 @@ void inserirNodoNaoCheio(long posicaoRaiz, int chave){
 
     if (x.ehFolha == true)
     {
+        FILE *regX = abrirArquivo(ARQREG);
+        Folha rX;
+        fseek (regX, x.posicao, SEEK_SET);
+        fread (&rX, sizeof (Folha), 1, regX);
+        fclose(regX);
+        free(regX);
+
         while (i >= 0 && x.chaves[i] > chave) // Se for um Nodo folha, desloca as chaves existentes para abrir espaço para a nova chave
         {
+            rX.registros[i+1] = rX.registros[i];
             x.chaves[i+1] = x.chaves[i];
             i = i - 1;
         }
+
+        FILE *regX2 = abrirArquivo(ARQREG);
+        fseek (regX2, x.posicao, SEEK_SET);
+        if (fwrite (&rX, sizeof(Folha), 1, regX2) == 1)
+		    printf("Registro armazenado com sucesso\n");
+	    else
+		    printf("Erro no armazenamento do registro\n");
+        fclose(regX2);
+        free(regX2);
         
         x.chaves[i+1] = chave; // Insere a chave na posicao aberta
         x.numChaves = x.numChaves + 1; // Incrementa a quantidade de chaves em x
 
-        FILE *arqX2 = abrirArquivo();
+        FILE *arqX2 = abrirArquivo(ARQARVORE);
         fseek (arqX2, x.posicao, SEEK_SET); // Realiza o salvamento das alteracoes do Nodo no arquivo
         if (fwrite (&x, sizeof(Nodo), 1, arqX2) == 1)
 		    printf("Registro armazenado com sucesso\n");
@@ -229,6 +222,8 @@ void inserirNodoNaoCheio(long posicaoRaiz, int chave){
 		    printf("Erro no armazenamento do registro\n");
         fclose(arqX2);
         free(arqX2);
+
+        return x.posicao;
     } 
     else 
     {
@@ -237,7 +232,7 @@ void inserirNodoNaoCheio(long posicaoRaiz, int chave){
             i = i - 1;
         }
 
-        FILE *arqF = abrirArquivo();
+        FILE *arqF = abrirArquivo(ARQARVORE);
         Nodo filho;                              // Realiza a leitura do i-ezimo filho de x
         fseek (arqF, x.filhos[i+1], SEEK_SET);
         fread (&filho, sizeof (Nodo), 1, arqF);
@@ -249,7 +244,7 @@ void inserirNodoNaoCheio(long posicaoRaiz, int chave){
             printf("Filho Cheio! Necessario dividir...\n");
             dividirFilhos(x.posicao, i+1); // Em caso positivo, chama o metodo de divisao das chaves
 
-            FILE *arqF2 = abrirArquivo();
+            FILE *arqF2 = abrirArquivo(ARQARVORE);
             fseek (arqF2, x.posicao, SEEK_SET);
             fread (&x, sizeof (Nodo), 1, arqF2);
             fclose(arqF2);
@@ -262,7 +257,7 @@ void inserirNodoNaoCheio(long posicaoRaiz, int chave){
             
         }
         
-        FILE *arqF3 = abrirArquivo();                             // Realiza a leitura do i-ezimo filho de x
+        FILE *arqF3 = abrirArquivo(ARQARVORE);                             // Realiza a leitura do i-ezimo filho de x
         fseek (arqF3, x.filhos[i+1], SEEK_SET);
         fread (&filho, sizeof (Nodo), 1, arqF3);
         fclose(arqF3);
@@ -273,11 +268,11 @@ void inserirNodoNaoCheio(long posicaoRaiz, int chave){
 
 }
 
-void inserir(long posicaoRaiz, int chave){
+long inserir(long posicaoRaiz, int chave){
 
     printf("Entrando no metodo inserir...\n");
 
-    FILE *arqR = abrirArquivo();
+    FILE *arqR = abrirArquivo(ARQARVORE);
     Nodo r;                           // Aloca memoria para o novo Nodo
     fseek (arqR, posicaoRaiz, SEEK_SET);
     fread (&r, sizeof (Nodo), 1, arqR);
@@ -291,7 +286,7 @@ void inserir(long posicaoRaiz, int chave){
         long posNovoNodo = criarNodo();     // Cria um novo Nodo e retorna a posicao do mesmo
         printf ("Posicao do novo Nodo: %ld\n\n", posNovoNodo);
 
-        FILE *arqS = abrirArquivo();
+        FILE *arqS = abrirArquivo(ARQARVORE);
         Nodo s;                           // Aloca memoria para o novo Nodo
         fseek (arqS, posNovoNodo, SEEK_SET);
         fread (&s, sizeof (Nodo), 1, arqS);
@@ -310,7 +305,7 @@ void inserir(long posicaoRaiz, int chave){
 
         dividirFilhos(s.posicao,0); // Divide o antigo Nodo raiz e move uma chave para o novo Nodo s
 
-        FILE *arqS2 = abrirArquivo();                           // Aloca memoria para o novo Nodo
+        FILE *arqS2 = abrirArquivo(ARQARVORE);                           // Aloca memoria para o novo Nodo
         fseek (arqS2, posNovoNodo, SEEK_SET);
         fread (&s, sizeof (Nodo), 1, arqS2);
         fclose(arqS2);
@@ -321,9 +316,9 @@ void inserir(long posicaoRaiz, int chave){
             i = i + 1;
         }
 
-        inserirNodoNaoCheio(s.filhos[i], chave); // Insere a nova chave em algum lugar da árvore
+        long resultado = inserirNodoNaoCheio(s.filhos[i], chave); // Insere a nova chave em algum lugar da árvore
 
-        FILE *arqS3 = abrirArquivo();
+        FILE *arqS3 = abrirArquivo(ARQARVORE);
         Header nH;
         nH.posNodoRaiz = s.posicao;  
 
@@ -336,17 +331,19 @@ void inserir(long posicaoRaiz, int chave){
         free(arqS3); 
 
         printf("Fim da execucao para o Nodo cheio...\n");
+
+        return resultado;
     }
     else // Se r nao estiver cheio, chama o inserirNodoNaoCheio para r
     {
-        inserirNodoNaoCheio(r.posicao, chave);
+        return inserirNodoNaoCheio(r.posicao, chave);
     }
     
 }
 
 void imprimirArvore(long posicaoRaiz, int nivel){ //Metodo para imprimir uma  representacao da arvore
 
-    FILE *arqPT = abrirArquivo();
+    FILE *arqPT = abrirArquivo(ARQARVORE);
     Nodo x;
     fseek (arqPT, posicaoRaiz, SEEK_SET);
     fread (&x, sizeof (Nodo), 1, arqPT);
@@ -369,7 +366,7 @@ void imprimirArvore(long posicaoRaiz, int nivel){ //Metodo para imprimir uma  re
     {
         if (x.ehFolha == false)
         {
-            FILE *arqPF = abrirArquivo();
+            FILE *arqPF = abrirArquivo(ARQARVORE);
             Nodo filho;
             fseek(arqPF, x.filhos[i], SEEK_SET);
             fread(&filho, sizeof(Nodo), 1, arqPF);
@@ -385,7 +382,7 @@ void imprimirArvore(long posicaoRaiz, int nivel){ //Metodo para imprimir uma  re
 
 void lerNodoNaPosicao(long posicaoNodo){
 
-    FILE *arq = abrirArquivo(); // Abre o arquivo para verificar se já existem dados salvos
+    FILE *arq = abrirArquivo(ARQARVORE); // Abre o arquivo para verificar se já existem dados salvos
     Nodo x;
     fseek (arq, posicaoNodo, SEEK_SET);
     fread(&x, sizeof(Nodo), 1, arq); 
@@ -404,9 +401,9 @@ void lerNodoNaPosicao(long posicaoNodo){
     }
 }
 
-int main(){
+int arvoreB(){
 
-    FILE *a = abrirArquivo(); // Abre o arquivo para verificar se já existem dados salvos
+    FILE *a = abrirArquivo(ARQARVORE); // Abre o arquivo para verificar se já existem dados salvos
     fseek (a, 0, SEEK_END); 
     long tamanho = ftell(a);
     fclose(a);
@@ -416,7 +413,7 @@ int main(){
     {
         printf("Nenhum dado encontrado! Arvore vazia\n\n");
         
-        FILE *arq = abrirArquivo(); // Abre o arquivo para leitura
+        FILE *arq = abrirArquivo(ARQARVORE); // Abre o arquivo para leitura
         Header cabecalho;
         cabecalho.posNodoRaiz = 0;
 
@@ -431,7 +428,7 @@ int main(){
 
         long pos = criarNodo(); // Cria um novo nodo no arquivo
 
-        FILE *arq2 = abrirArquivo();
+        FILE *arq2 = abrirArquivo(ARQARVORE);
         Nodo a;
         fseek (arq2, pos, SEEK_SET);
         fread (&a, sizeof (Nodo), 1, arq2);
@@ -449,7 +446,7 @@ int main(){
     
     }
         
-    char comando;
+    /*char comando;
     int chave = 0;
     int posicao = 0;
     
@@ -462,7 +459,7 @@ int main(){
         if (comando == 'i')
         {
 
-            FILE *arqI = abrirArquivo(); // Abre o arquivo para leitura
+            FILE *arqI = abrirArquivo(ARQARVORE); // Abre o arquivo para leitura
             Header hI;
             fseek (arqI, 0, SEEK_SET);
             fread (&hI, sizeof (Header), 1, arqI);         
@@ -480,7 +477,7 @@ int main(){
         if (comando == 'b')
         {
 
-            FILE *arqB = abrirArquivo(); // Abre o arquivo para leitura
+            FILE *arqB = abrirArquivo(ARQARVORE); // Abre o arquivo para leitura
             Header hB;
             fseek (arqB, 0, SEEK_SET);
             fread (&hB, sizeof (Nodo), 1, arqB);         
@@ -501,7 +498,7 @@ int main(){
             {
                 printf ("Esta chave esta no Nodo de posicao: %ld\n", posNodo);
 
-                FILE *arqE = abrirArquivo(); // Abre o arquivo para leitura
+                FILE *arqE = abrirArquivo(ARQARVORE); // Abre o arquivo para leitura
                 Nodo x;
                 fseek (arqE, posNodo, SEEK_SET);
                 fread (&x, sizeof (Nodo), 1, arqE);
@@ -523,7 +520,7 @@ int main(){
         if (comando == 'p')
         {
             
-            FILE *arqP = abrirArquivo(); // Abre o arquivo para leitura
+            FILE *arqP = abrirArquivo(ARQARVORE); // Abre o arquivo para leitura
             Header hP;
             fseek (arqP, 0, SEEK_SET);
             fread (&hP, sizeof (Nodo), 1, arqP);         
@@ -543,6 +540,6 @@ int main(){
             lerNodoNaPosicao(posi);
         }
         
-    }
+    }*/
 
 }
