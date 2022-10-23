@@ -8,14 +8,48 @@
 #define MTAMNOME 20
 #define ARQARVORE "arvoreB"
 
+int noSeq = 0;
+
+void imprimirArvoreCompleta(long posicaoRaiz, int nivel){ //Metodo para imprimir uma  representacao da arvore
+
+    FILE *arqPT = abrirArquivo(ARQARVORE);
+    Nodo x;
+    fseek (arqPT, posicaoRaiz, SEEK_SET);
+    fread (&x, sizeof (Nodo), 1, arqPT);
+    fclose(arqPT);
+    free(arqPT);
+
+    noSeq++;
+    printf("No: %d: ", noSeq);
+    for (int i = 0; i < x.numChaves; i++)
+    {
+        printf("apontador: %ld chave: %d ", (x.posicao+i)*sizeof(Registro), x.chaves[i]);
+    }
+    printf("\n");
+
+    for (int i = 0; i <= x.numChaves; i++)
+    {
+        if (x.ehFolha == false)
+        {
+            FILE *arqPF = abrirArquivo(ARQARVORE);
+            Nodo filho;
+            fseek(arqPF, x.filhos[i], SEEK_SET);
+            fread(&filho, sizeof(Nodo), 1, arqPF);
+            fclose(arqPF);
+            free(arqPF);
+
+            imprimirArvoreCompleta(filho.posicao, nivel + 1);
+        }
+        
+    }
+}
+
 int main() {
 
     arvoreB();
-
-	char comando;
     
-    printf("Rodando...\n");
-    printf("Insira um comando...\n");
+	char comando;
+
     while(comando != 'e'){
 
         scanf(" %c", &comando);
@@ -24,11 +58,11 @@ int main() {
         {   
             int chave = 0;
 
-            Registro regEntrada;
+            Registro reg;
             scanf("%d", &chave);
-            regEntrada.chave = chave;
-            //scanf("%s", regEntrada.nome);
-            //scanf("%d", regEntrada.idade);
+            reg.chave = chave;
+            scanf(" %s", reg.nome);
+            scanf("%d", &reg.idade);
 
             FILE *arq = abrirArquivo(ARQARVORE);
             Header h;
@@ -45,12 +79,11 @@ int main() {
             }
             else
             {
-                long resultado = inserir(h.posNodoRaiz, chave);
-                printf("O valor de resultado eh: %ld\n", resultado);
+                long posNodo = inserir(h.posNodoRaiz, chave);
 
                 FILE *aL = abrirArquivo(ARQARVORE);
                 Nodo local;
-                fseek(aL, resultado, SEEK_SET);
+                fseek(aL, posNodo, SEEK_SET);
                 fread(&local, sizeof(Nodo), 1, aL);
                 fclose(aL);
                 free(aL);
@@ -61,32 +94,18 @@ int main() {
                 {
                     if (local.chaves[i] == chave)
                     {
-                        printf("Posicao do registro dentro da folha: %d\n", i);
                         localChave = i;
                     }
                     
                 }
 
                 FILE *regS = abrirArquivo(ARQREG);
-                Folha fA;
-                fseek(regS, resultado, SEEK_SET);
-                fread(&fA, sizeof(Folha), 1, regS);
-
-                printf("Chave antes do registro: %d\n", regEntrada.chave);
-
-                fA.registros[localChave] = regEntrada;
-
-                printf("Chave depois do registro: %d\n", fA.registros[localChave].chave);
-
-                fseek(regS, resultado, SEEK_SET);
-                if (fwrite (&fA, sizeof(Folha), 1, regS) == 1)
-		            printf("insercao com sucesso: %d\n", chave);
-	            else
-		            printf("erro no armazenamento do registro\n");
-                }
-            
+                fseek(regS, (posNodo+localChave)*(sizeof(Registro)),SEEK_SET);
+                fwrite (&reg, sizeof(Registro), 1, regS);
+                fclose(regS);
+                free(regS);
+            }
         }
-
         if (comando == 'c')
         {
             int chave = 0;
@@ -121,30 +140,36 @@ int main() {
                 {
                     if (local.chaves[i] == chave)
                     {
-                        printf("Posicao do registro dentro da folha: %d\n", i);
                         localChave = i;
                     }                    
                 }
 
                 FILE *regC = abrirArquivo(ARQREG);
-                Folha fC;
-                fseek(regC, buscaExistente, SEEK_SET);
-                fread(&fC, sizeof(Folha), 1, regC);
+                Registro rC;
+                fseek(regC, (buscaExistente+localChave)*(sizeof(Registro)),SEEK_SET);
+                fread(&rC, sizeof(Registro), 1, regC);
                 fclose(regC);
                 free(regC);
 
-                printf("chave: %d\n", fC.registros[localChave].chave);
+                printf("chave: %d\n", rC.chave);
+                printf("nome: %s\n", rC.nome);
+                printf("idade: %d\n", rC.idade);
+
             }
+        }
+        if (comando == 'p')
+        {
+
+            FILE *arqP = abrirArquivo(ARQARVORE);
+            Header h;
+            fseek (arqP, 0, SEEK_SET);
+            fread (&h, sizeof (Header), 1, arqP);
+            fclose(arqP);
+            free(arqP);
+
+            imprimirArvoreCompleta(h.posNodoRaiz, 0);
+            noSeq = 0;
         }
         
     }
-    
-    /*fseek(arquivo, posicao*sizeof(Registro), SEEK_SET);
-
-	if (fwrite (&reg, sizeof(Registro), 1, arquivo) == 1)
-		printf("Registro armazenado com sucesso\n");
-	else
-		printf("Erro no armazenamento do registro\n");
-
-	fclose(arquivo);*/
 }

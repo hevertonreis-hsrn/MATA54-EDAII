@@ -11,10 +11,4 @@ typedef struct registro
     int idade;
 } Registro;
 
-typedef struct folha
-{
-    Registro registros[2*FATOR_CONJSEQ-1];
-} Folha;
-
-
 #endif // REGISTRO_H

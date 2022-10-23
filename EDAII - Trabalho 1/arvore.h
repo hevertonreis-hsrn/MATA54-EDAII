@@ -11,6 +11,7 @@ typedef struct nodo
     bool ehFolha;                           // Se TRUE indica que o nó é uma folha
     int chaves[2 * FATOR_CONJSEQ - 1];      // Vetor de chaves
     long filhos[2 * FATOR_CONJSEQ];         // Vetor de filhos
+    char offset[44];                        // Garante que a arevore reserva esapaço para os registros 
 } Nodo;
 
 typedef struct header

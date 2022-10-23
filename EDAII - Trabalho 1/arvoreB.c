@@ -72,11 +72,7 @@ long criarNodo() { // Metodo para criar um Nodo basico
         x.filhos[i] = -1;
     }
 
-    if (fwrite (&x, sizeof(Nodo), 1, arq) == 1)
-		printf("Registro armazenado com sucesso\n");
-	else
-		printf("Erro no armazenamento do registro\n");
-
+    fwrite (&x, sizeof(Nodo), 1, arq);
     fclose(arq);
     free(arq);
 
@@ -84,8 +80,6 @@ long criarNodo() { // Metodo para criar um Nodo basico
 }
 
 void dividirFilhos(long posicaoRaiz, int i){
-
-    printf("Entrando no metodo dividirFilhos...\n");
 
     FILE *arqX = abrirArquivo(ARQARVORE);
     Nodo x;
@@ -112,17 +106,25 @@ void dividirFilhos(long posicaoRaiz, int i){
     z.ehFolha = y.ehFolha;
     z.numChaves = FATOR_CONJSEQ - 1;
 
+    FILE *regK = abrirArquivo(ARQREG);
+    Registro rY;   
+
     for (int j = 0; j < FATOR_CONJSEQ - 1; j++) // Copia as ultimas t-1 chaves de y para z
     {
+        fseek(regK, (y.posicao+(j+FATOR_CONJSEQ))*(sizeof(Registro)),SEEK_SET);
+        fread(&rY, sizeof(Registro), 1, regK);
+        fseek(regK, (z.posicao+j)*(sizeof(Registro)),SEEK_SET);
+        fwrite(&rY, sizeof(Registro), 1, regK);
         z.chaves[j] = y.chaves[j+FATOR_CONJSEQ];
     }
+
+    fclose(regK);
+    free(regK);
     
     if (y.ehFolha == false)  // Copia os ultimos t filhos de y para z
     {
-        printf("\nEntrou no IF caso y nao seja folha\n");
         for (int j = 0; j < FATOR_CONJSEQ; j++)
         {
-            printf("\nEndereco do filho: %ld\n", y.filhos[j+FATOR_CONJSEQ]);
             z.filhos[j] = y.filhos[j+FATOR_CONJSEQ];
         }
     }
@@ -136,46 +138,50 @@ void dividirFilhos(long posicaoRaiz, int i){
 
     x.filhos[i+1] = z.posicao; // Indica z como um dos filhos de x
 
+    FILE *regK2 = abrirArquivo(ARQREG);
+    Registro rX;
+
     for (int j = x.numChaves - 1; j >= i; j--) // Realoca as chaves de x para criar espaco para uma chave vinda de y
     {
+        fseek(regK2, (x.posicao+j)*(sizeof(Registro)),SEEK_SET);
+        fread(&rX, sizeof(Registro), 1, regK2);
+        fseek(regK, (x.posicao+(j+1))*(sizeof(Registro)),SEEK_SET);
+        fwrite(&rX, sizeof(Registro), 1, regK);
         x.chaves[j+1] = x.chaves[j]; 
     }
+
+    fseek(regK2, (y.posicao+(FATOR_CONJSEQ-1))*(sizeof(Registro)),SEEK_SET);
+    fread(&rX, sizeof(Registro), 1, regK2);
+    fseek(regK, (x.posicao+i)*(sizeof(Registro)),SEEK_SET);
+    fwrite(&rX, sizeof(Registro), 1, regK);
+
+    fclose(regK2);
+    free(regK2);
     
     x.chaves[i] = y.chaves[FATOR_CONJSEQ-1]; // Copia a chave do meio de y para x
     x.numChaves = x.numChaves + 1; // Aumenta a contagem de chaves de x
 
     FILE *arqX2 = abrirArquivo(ARQARVORE);
     fseek (arqX2, x.posicao, SEEK_SET); // Realiza o salvamento das alteracoes do Nodo x no arquivo
-    if (fwrite (&x, sizeof(Nodo), 1, arqX2) == 1)
-		printf("Registro x armazenado com sucesso\n");
-	else
-		printf("Erro no armazenamento do registro x\n");
+    fwrite (&x, sizeof(Nodo), 1, arqX2);
     fclose(arqX2);
     free(arqX2);
 
     FILE *arqY2 = abrirArquivo(ARQARVORE);
     fseek (arqY2, y.posicao, SEEK_SET); // Realiza o salvamento das alteracoes do Nodo y no arquivo
-    if (fwrite (&y, sizeof(Nodo), 1, arqY2) == 1)
-		printf("Registro y armazenado com sucesso\n");
-	else
-		printf("Erro no armazenamento do registro y\n");
+    fwrite (&y, sizeof(Nodo), 1, arqY2);
     fclose(arqY2);
     free(arqY2);
 
     FILE *arqZ2 = abrirArquivo(ARQARVORE);
     fseek (arqZ2, z.posicao, SEEK_SET); // Realiza o salvamento das alteracoes do Nodo z no arquivo
-    if (fwrite (&z, sizeof(Nodo), 1, arqZ2) == 1)
-		printf("Registro z armazenado com sucesso\n");
-	else
-		printf("Erro no armazenamento do registro z\n");
+    fwrite (&z, sizeof(Nodo), 1, arqZ2);
     fclose(arqZ2);
     free(arqZ2);
 
 }
 
 long inserirNodoNaoCheio(long posicaoRaiz, int chave){
-
-    printf("Entrando no metodo inserirNodoNaoCheio...\n");
 
     FILE *arqX = abrirArquivo(ARQARVORE);
     Nodo x;
@@ -188,38 +194,28 @@ long inserirNodoNaoCheio(long posicaoRaiz, int chave){
 
     if (x.ehFolha == true)
     {
-        FILE *regX = abrirArquivo(ARQREG);
-        Folha rX;
-        fseek (regX, x.posicao, SEEK_SET);
-        fread (&rX, sizeof (Folha), 1, regX);
-        fclose(regX);
-        free(regX);
+        FILE *regX = abrirArquivo(ARQREG);      
 
         while (i >= 0 && x.chaves[i] > chave) // Se for um Nodo folha, desloca as chaves existentes para abrir espaço para a nova chave
         {
-            rX.registros[i+1] = rX.registros[i];
+            Registro rX;
+            fseek(regX, (x.posicao+i)*(sizeof(Registro)),SEEK_SET);
+            fread(&rX, sizeof(Registro), 1, regX);
+            fseek(regX, (x.posicao+(i+1))*(sizeof(Registro)),SEEK_SET);
+            fwrite(&rX, sizeof(Registro), 1, regX);
             x.chaves[i+1] = x.chaves[i];
             i = i - 1;
         }
 
-        FILE *regX2 = abrirArquivo(ARQREG);
-        fseek (regX2, x.posicao, SEEK_SET);
-        if (fwrite (&rX, sizeof(Folha), 1, regX2) == 1)
-		    printf("Registro armazenado com sucesso\n");
-	    else
-		    printf("Erro no armazenamento do registro\n");
-        fclose(regX2);
-        free(regX2);
+        fclose(regX);
+        free(regX);
         
         x.chaves[i+1] = chave; // Insere a chave na posicao aberta
         x.numChaves = x.numChaves + 1; // Incrementa a quantidade de chaves em x
 
         FILE *arqX2 = abrirArquivo(ARQARVORE);
         fseek (arqX2, x.posicao, SEEK_SET); // Realiza o salvamento das alteracoes do Nodo no arquivo
-        if (fwrite (&x, sizeof(Nodo), 1, arqX2) == 1)
-		    printf("Registro armazenado com sucesso\n");
-	    else
-		    printf("Erro no armazenamento do registro\n");
+        fwrite (&x, sizeof(Nodo), 1, arqX2);
         fclose(arqX2);
         free(arqX2);
 
@@ -241,7 +237,6 @@ long inserirNodoNaoCheio(long posicaoRaiz, int chave){
 
         if (filho.numChaves == (2 * FATOR_CONJSEQ - 1)) // Verifica se o filho ja esta cheio
         {
-            printf("Filho Cheio! Necessario dividir...\n");
             dividirFilhos(x.posicao, i+1); // Em caso positivo, chama o metodo de divisao das chaves
 
             FILE *arqF2 = abrirArquivo(ARQARVORE);
@@ -270,8 +265,6 @@ long inserirNodoNaoCheio(long posicaoRaiz, int chave){
 
 long inserir(long posicaoRaiz, int chave){
 
-    printf("Entrando no metodo inserir...\n");
-
     FILE *arqR = abrirArquivo(ARQARVORE);
     Nodo r;                           // Aloca memoria para o novo Nodo
     fseek (arqR, posicaoRaiz, SEEK_SET);
@@ -281,10 +274,8 @@ long inserir(long posicaoRaiz, int chave){
 
     if (r.numChaves == (2 * FATOR_CONJSEQ - 1)) // Se r estiver cheio, aumenta a altura da arvore
     {
-        printf("Nodo cheio...\n");
 
         long posNovoNodo = criarNodo();     // Cria um novo Nodo e retorna a posicao do mesmo
-        printf ("Posicao do novo Nodo: %ld\n\n", posNovoNodo);
 
         FILE *arqS = abrirArquivo(ARQARVORE);
         Nodo s;                           // Aloca memoria para o novo Nodo
@@ -296,12 +287,9 @@ long inserir(long posicaoRaiz, int chave){
         s.filhos[0] = r.posicao; // Transforma o antigo Nodo raiz em um dos filhos do novo Nodo s
 
         fseek (arqS, s.posicao, SEEK_SET);
-        if (fwrite (&s, sizeof(Nodo), 1, arqS) == 1)
-		    printf("Registro armazenado com sucesso\n");
-	    else
-		    printf("Erro no armazenamento do registro\n");
+        fwrite (&s, sizeof(Nodo), 1, arqS);
         fclose(arqS);
-        free(arqS);
+        free(arqS);    
 
         dividirFilhos(s.posicao,0); // Divide o antigo Nodo raiz e move uma chave para o novo Nodo s
 
@@ -323,14 +311,9 @@ long inserir(long posicaoRaiz, int chave){
         nH.posNodoRaiz = s.posicao;  
 
         fseek (arqS3, 0, SEEK_SET);
-        if (fwrite (&nH, sizeof(Header), 1, arqS3) == 1)
-		    printf("Registro armazenado com sucesso\n");
-	    else
-		    printf("Erro no armazenamento do registro\n");
+        fwrite (&nH, sizeof(Header), 1, arqS3);
         fclose(arqS3);
-        free(arqS3); 
-
-        printf("Fim da execucao para o Nodo cheio...\n");
+        free(arqS3);
 
         return resultado;
     }
@@ -410,19 +393,13 @@ int arvoreB(){
     free(a);
 
     if (tamanho == 0)
-    {
-        printf("Nenhum dado encontrado! Arvore vazia\n\n");
-        
+    {        
         FILE *arq = abrirArquivo(ARQARVORE); // Abre o arquivo para leitura
         Header cabecalho;
         cabecalho.posNodoRaiz = 0;
 
         fseek (arq, 0, SEEK_SET);
-        if (fwrite (&cabecalho, sizeof(Header), 1, arq) == 1)
-		    printf("Registro armazenado com sucesso\n");
-	    else
-		printf("Erro no armazenamento do registro\n");
-
+        fwrite (&cabecalho, sizeof(Header), 1, arq);
         fclose(arq);
         free(arq);
 
@@ -436,11 +413,7 @@ int arvoreB(){
         cabecalho.posNodoRaiz = a.posicao; // Informa ao nodo a posicao do nodo raiz
 
         fseek (arq2, 0, SEEK_SET); // Armazena as alteracoes
-        if (fwrite (&cabecalho, sizeof(Header), 1, arq2) == 1)
-		    printf("Registro armazenado com sucesso\n");
-	    else
-		    printf("Erro no armazenamento do registro\n");
-
+        fwrite (&cabecalho, sizeof(Header), 1, arq2);
         fclose(arq2); //Encerra o fluxo de arquivos
         free(arq2);
     
