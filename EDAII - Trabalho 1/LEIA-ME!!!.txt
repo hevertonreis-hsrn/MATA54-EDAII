@@ -1,0 +1,44 @@
+Universidade Federal da Bahia - UFBA
+MATA54 - Estruturas de Dados e Algoritmos II
+Docente - Prof. Flávio Assis
+Semestre 2022.2 - 26 de setembro de 2022
+
+Discente - Heverton Silva dos Reis M 221118967
+
+
+O presente projeto foi implementado na linguagem C e compilado com o auxilio do compilador gcc.
+Para compilar, insira o seguinte comando no terminal: gcc principal.c -o programa
+Os arquivos onde os registros devem ser armazenados já apresentam dados. As chaves inseridas foram: 
+
+2, 5, 29, 33 e 99 
+
+Lista de Funcionalidades:
+
+1. insere registro: 
+
+Esta operação conterá quatro linhas. 
+A primeira linha conterá a letra ’i’. 
+A segunda conterá um valor de chave. 
+A terceira conterá uma sequência de até 20 caracteres, que corresponderá ao campo nome.
+
+2. consulta registro: 
+
+Esta operação conterá duas linhas. 
+A primeira linha conterá a letra ’c’. 
+A segunda conterá um valor de chave.
+
+3. imprime árvore: 
+
+Esta operação conterá apenas uma linha, contendo a letra ’p’.
+
+4. término da sequência de comandos: 
+
+A sequência de comandos será terminada por uma linha com a letra ’e’.
+
+**OBS: as funcionalidades 'remove registro' e 'imprime chaves em ordem crescente' 
+não puderam ser implementadas para este projeto
+
+
+
+
+
