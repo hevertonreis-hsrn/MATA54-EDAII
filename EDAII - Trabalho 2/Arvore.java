@@ -172,8 +172,9 @@ public class Arvore {
                 if (filho.palavra.startsWith(comecaCom)){
                     if (novaPalavra.equals(filho.palavra)){
                         if ((long) filho.filhos.size() == 0){
-                            nodoAtual.filhos.remove(filho);
 
+                            nodoAtual.filhos.remove(filho);
+                            return;
                         }
                     }
                     RemoverRecursivo(novaPalavra, filho);
