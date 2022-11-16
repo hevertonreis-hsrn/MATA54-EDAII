@@ -1,24 +1,24 @@
-import java.util.*;;
+import java.util.*;
 
 class Nodo {
 
     //public Nodo(){
     //    Palavra = "";
-    //    List<Nodo> Filhos = new ArrayList<>();
+    //    Filhos = new ArrayList<>();
     //}
 
     public Nodo(String palavra){
-        Palavra = palavra;
-        List<Nodo> Filhos = new ArrayList<Nodo>();
+        this.palavra = palavra;
+        filhos = new ArrayList<>();
     }
 
-    public String Palavra;
-    public List<Nodo> Filhos;
+    public String palavra;
+    public List<Nodo> filhos;
 }
 
 public class Arvore {
 
-    private Nodo raiz;
+    private final Nodo raiz;
 
     public Arvore(){
         raiz = new Nodo("");
@@ -32,7 +32,7 @@ public class Arvore {
 
         int combinacoes = CombinaCharConsecutivo(palavra, nodoAtual);
 
-        int tamanhoTermo = nodoAtual.Palavra.length();
+        int tamanhoTermo = nodoAtual.palavra.length();
         int tamanhoPalavra = palavra.length();
 
         if( (combinacoes == 0) ||
@@ -43,67 +43,63 @@ public class Arvore {
             boolean inserido = false;
             String novaPalavra = palavra.substring(combinacoes, tamanhoPalavra - combinacoes); 
 
-            if(nodoAtual.Filhos != null) {
-                for (Nodo filho : nodoAtual.Filhos) {
 
-                    char caractere = novaPalavra.charAt(0);
-                    String comecaCom = Character.toString(caractere);
+            for (Nodo filho : nodoAtual.filhos) {
 
-                    if (filho.Palavra.startsWith(comecaCom)) {
-                        inserido = true;
-                        InserirRecursivo(novaPalavra, filho);
-                    }
+                char caractere = novaPalavra.charAt(0);
+                String comecaCom = Character.toString(caractere);
+
+                if (filho.palavra.startsWith(comecaCom)) {
+                    inserido = true;
+                    InserirRecursivo(novaPalavra, filho);
                 }
             }
+
             if(!inserido){
-                if (nodoAtual.Filhos != null) {
-                    nodoAtual.Filhos.add(new Nodo(novaPalavra));
-                }
+                nodoAtual.filhos.add(new Nodo(novaPalavra));
             }
 
         } else if(combinacoes < tamanhoPalavra){
 
             String raizComum = palavra.substring(0, combinacoes);
-            String ramoPalavraAnterior = nodoAtual.Palavra.substring(combinacoes, tamanhoTermo - combinacoes);
-            String ramoNovaPalavra = palavra.substring(combinacoes, tamanhoPalavra - combinacoes);
+            String ramoPalavraAnterior = nodoAtual.palavra.substring(combinacoes, tamanhoTermo/* - combinacoes*/);
+            String ramoNovaPalavra = palavra.substring(combinacoes, tamanhoPalavra /*- combinacoes*/);
 
-            nodoAtual.Palavra = raizComum;
+            nodoAtual.palavra = raizComum;
 
             Nodo novoNodoPalavraAnterior = new Nodo(ramoPalavraAnterior);
-            novoNodoPalavraAnterior.Filhos.addAll(nodoAtual.Filhos);
+            novoNodoPalavraAnterior.filhos.addAll(nodoAtual.filhos);
 
-            nodoAtual.Filhos.clear();
-            nodoAtual.Filhos.add(novoNodoPalavraAnterior);
+            nodoAtual.filhos.clear();
+            nodoAtual.filhos.add(novoNodoPalavraAnterior);
 
             Nodo novoNodoNovaPalavra = new Nodo(ramoNovaPalavra);
+            nodoAtual.filhos.add(novoNodoNovaPalavra);
+
         } else if (combinacoes > tamanhoTermo ) {
 
-            String novaPalavraNodo = nodoAtual.Palavra.substring(tamanhoTermo, tamanhoPalavra);
+            String novaPalavraNodo = nodoAtual.palavra.substring(tamanhoTermo, tamanhoPalavra);
             Nodo novoNodo = new Nodo(novaPalavraNodo);
-            nodoAtual.Filhos.add(novoNodo);
+            nodoAtual.filhos.add(novoNodo);
         }
     }
 
     private int CombinaCharConsecutivo(String palavra, Nodo nodoAtual){
 
         int combinacoes = 0;
-        int tamanhoMin = 0;
+        int tamanhoMin;
 
-        int tamanhoTermo = nodoAtual.Palavra.length();
+        int tamanhoTermo = nodoAtual.palavra.length();
         int tamanhoPalavra = palavra.length();
 
-        if( tamanhoTermo >= tamanhoPalavra ){
-            tamanhoMin = tamanhoPalavra;
-        } else if( tamanhoTermo < tamanhoPalavra ){
-            tamanhoMin = tamanhoTermo;
-        }
+        tamanhoMin = Math.min(tamanhoTermo, tamanhoPalavra);
 
         if(tamanhoMin > 0){
 
             for(int i = 0; i < tamanhoMin; i++){
 
                 char[] novaPalavra = palavra.toCharArray();
-                char[] palavraDoNodo = nodoAtual.Palavra.toCharArray();
+                char[] palavraDoNodo = nodoAtual.palavra.toCharArray();
 
                 if(novaPalavra[i] == palavraDoNodo[i]){
                     combinacoes++;
@@ -125,7 +121,7 @@ public class Arvore {
 
         int combinacoes = CombinaCharConsecutivo(palavra, nodoAtual);
 
-        int tamanhoTermo = nodoAtual.Palavra.length();
+        int tamanhoTermo = nodoAtual.palavra.length();
         int tamanhoPalavra = palavra.length();
 
         if ( (combinacoes == 0) ||
@@ -133,20 +129,20 @@ public class Arvore {
                 ( (combinacoes > 0) && (combinacoes < tamanhoPalavra) && (combinacoes >= tamanhoTermo) )
         ){
 
-            String novaPalavra = palavra.substring(combinacoes, tamanhoPalavra - combinacoes);
-            for (Nodo filho : nodoAtual.Filhos) {
+            String novaPalavra = palavra.substring(combinacoes, tamanhoPalavra /*- combinacoes*/);
+
+            for (Nodo filho : nodoAtual.filhos) {
 
                 char caractere = novaPalavra.charAt(0);
                 String comecaCom = Character.toString(caractere);
 
-                if (filho.Palavra.startsWith(comecaCom)){
+                if (filho.palavra.startsWith(comecaCom)){
                     return BuscarRecursivo(novaPalavra, filho);
                 }
             }
+
             return false;
-        } else if (combinacoes == tamanhoTermo) {
-            return true;
-        } else return false;
+        } else return combinacoes == tamanhoTermo;
     }
 
     public void Remover(String palavra){
@@ -159,23 +155,24 @@ public class Arvore {
 
         int combinacoes = CombinaCharConsecutivo(palavra, nodoAtual);
 
-        int tamanhoTermo = nodoAtual.Palavra.length();
+        int tamanhoTermo = nodoAtual.palavra.length();
         int tamanhoPalavra = palavra.length();
 
         if ( (combinacoes == 0) ||
                 (nodoAtual == raiz) ||
                 ( (combinacoes > 0) && (combinacoes < tamanhoPalavra) && (combinacoes >= tamanhoTermo) )
         ){
-            String novaPalavra = palavra.substring(combinacoes, tamanhoPalavra - combinacoes);
-            for (Nodo filho : nodoAtual.Filhos) {
+            String novaPalavra = palavra.substring(combinacoes, tamanhoPalavra /*- combinacoes*/);
+
+            for (Nodo filho : nodoAtual.filhos) {
 
                 char caractere = novaPalavra.charAt(0);
                 String comecaCom = Character.toString(caractere);
 
-                if (filho.Palavra.startsWith(comecaCom)){
-                    if (novaPalavra == filho.Palavra){
-                        if ((long) filho.Filhos.size() == 0){
-                            nodoAtual.Filhos.remove(filho);
+                if (filho.palavra.startsWith(comecaCom)){
+                    if (novaPalavra.equals(filho.palavra)){
+                        if ((long) filho.filhos.size() == 0){
+                            nodoAtual.filhos.remove(filho);
 
                         }
                     }
@@ -205,7 +202,7 @@ public class Arvore {
         arvore.Remover("romanus");
 
         System.out.println(
-                arvore.Buscar("romulus") ?
+                arvore.Buscar("romanus") ?
                         "Existe na arvore" :
                         "Nao existe na arvore");
     }
