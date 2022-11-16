@@ -1,11 +1,8 @@
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Scanner;
 
 class Nodo {
-
-    //public Nodo(){
-    //    Palavra = "";
-    //    Filhos = new ArrayList<>();
-    //}
 
     public Nodo(String palavra){
         this.palavra = palavra;
@@ -41,7 +38,7 @@ public class Arvore {
         ){
 
             boolean inserido = false;
-            String novaPalavra = palavra.substring(combinacoes, tamanhoPalavra - combinacoes); 
+            String novaPalavra = palavra.substring(combinacoes, tamanhoPalavra); 
 
 
             for (Nodo filho : nodoAtual.filhos) {
@@ -62,8 +59,8 @@ public class Arvore {
         } else if(combinacoes < tamanhoPalavra){
 
             String raizComum = palavra.substring(0, combinacoes);
-            String ramoPalavraAnterior = nodoAtual.palavra.substring(combinacoes, tamanhoTermo/* - combinacoes*/);
-            String ramoNovaPalavra = palavra.substring(combinacoes, tamanhoPalavra /*- combinacoes*/);
+            String ramoPalavraAnterior = nodoAtual.palavra.substring(combinacoes, tamanhoTermo);
+            String ramoNovaPalavra = palavra.substring(combinacoes, tamanhoPalavra);
 
             nodoAtual.palavra = raizComum;
 
@@ -129,7 +126,7 @@ public class Arvore {
                 ( (combinacoes > 0) && (combinacoes < tamanhoPalavra) && (combinacoes >= tamanhoTermo) )
         ){
 
-            String novaPalavra = palavra.substring(combinacoes, tamanhoPalavra /*- combinacoes*/);
+            String novaPalavra = palavra.substring(combinacoes, tamanhoPalavra);
 
             for (Nodo filho : nodoAtual.filhos) {
 
@@ -162,7 +159,7 @@ public class Arvore {
                 (nodoAtual == raiz) ||
                 ( (combinacoes > 0) && (combinacoes < tamanhoPalavra) && (combinacoes >= tamanhoTermo) )
         ){
-            String novaPalavra = palavra.substring(combinacoes, tamanhoPalavra /*- combinacoes*/);
+            String novaPalavra = palavra.substring(combinacoes, tamanhoPalavra);
 
             for (Nodo filho : nodoAtual.filhos) {
 
@@ -187,24 +184,44 @@ public class Arvore {
 
         Arvore arvore = new Arvore();
 
-        arvore.Inserir("romane");
-        arvore.Inserir("romanus");
-        arvore.Inserir("romulus");
-        arvore.Inserir("rubens");
-        arvore.Inserir("ruber");
-        arvore.Inserir("rubicon");
-        arvore.Inserir("rubicundus");
+        Scanner entrada = new Scanner(System.in);
+        String comando = "";
 
-        System.out.println(
-                arvore.Buscar("romulus") ?
+        //arvore.Inserir("romane");
+        //arvore.Inserir("romanus");
+        //arvore.Inserir("romulus");
+        //arvore.Inserir("rubens");
+        //arvore.Inserir("ruber");
+        //arvore.Inserir("rubicon");
+        //arvore.Inserir("rubicundus");
+
+        while(!comando.equals("e")){
+
+            comando = entrada.nextLine();
+
+            if(comando.equals("i")){
+
+                String palavra = "";
+                palavra = entrada.nextLine();
+
+                arvore.Inserir(palavra);
+
+            }
+
+            if(comando.equals("c")){
+
+                String palavra = "";
+                palavra = entrada.nextLine();
+
+                boolean resultado = arvore.Buscar(palavra);
+
+                System.out.println(
+                resultado ?
                 "Existe na arvore" :
                 "Nao existe na arvore");
+            }
+        }
 
-        arvore.Remover("romanus");
-
-        System.out.println(
-                arvore.Buscar("romanus") ?
-                        "Existe na arvore" :
-                        "Nao existe na arvore");
+        entrada.close();
     }
 }
