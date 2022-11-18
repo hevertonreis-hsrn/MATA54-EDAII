@@ -11,21 +11,46 @@ class Nodo {
 
     public String palavra;
     public List<Nodo> filhos;
+    public int posicao;
+}
+
+class Verbete {
+
+    public Verbete(){
+
+    }
+
+    public Verbete(String palavra, String classe, String[] traducoes){
+        palavraOrigem = palavra;
+        classePalavra = classe;
+        this.traducoes = traducoes;
+    }
+
+    public String palavraOrigem;
+    public String classePalavra;
+    public String[] traducoes = new String[10];
+    
 }
 
 public class Arvore {
 
     private final Nodo raiz;
+    private final List<Verbete> dicionario;
+    private final String palavra;
+    private final int posicao;
 
     public Arvore(){
         raiz = new Nodo("");
+        dicionario = new ArrayList<>();
+        palavra = "";
+        posicao = 0;
     }
 
-    public void Inserir(String palavra){
-        InserirRecursivo(palavra, raiz);
+    public void Inserir(String palavra, Verbete verbete){
+        InserirRecursivo(palavra, raiz, verbete);
     }
 
-    private void InserirRecursivo(String palavra, Nodo nodoAtual){
+    private void InserirRecursivo(String palavra, Nodo nodoAtual, Verbete verbete){
 
         int combinacoes = CombinaCharConsecutivo(palavra, nodoAtual);
 
@@ -48,12 +73,15 @@ public class Arvore {
 
                 if (filho.palavra.startsWith(comecaCom)) {
                     inserido = true;
-                    InserirRecursivo(novaPalavra, filho);
+                    InserirRecursivo(novaPalavra, filho, verbete);
                 }
             }
 
             if(!inserido){
-                nodoAtual.filhos.add(new Nodo(novaPalavra));
+                Nodo nodoNovaPalavra = new Nodo(novaPalavra);
+                nodoAtual.filhos.add(nodoNovaPalavra);
+                int posNovoNodo = nodoAtual.filhos.indexOf(nodoNovaPalavra);
+                nodoAtual.filhos.get(posNovoNodo).posicao = InserirDicionario(verbete);
             }
 
         } else if(combinacoes < tamanhoPalavra){
@@ -72,12 +100,16 @@ public class Arvore {
 
             Nodo novoNodoNovaPalavra = new Nodo(ramoNovaPalavra);
             nodoAtual.filhos.add(novoNodoNovaPalavra);
-
+            int posNovoNodo = nodoAtual.filhos.indexOf(novoNodoNovaPalavra);
+            nodoAtual.filhos.get(posNovoNodo).posicao = InserirDicionario(verbete);
+            
         } else if (combinacoes > tamanhoTermo ) {
 
             String novaPalavraNodo = nodoAtual.palavra.substring(tamanhoTermo, tamanhoPalavra);
             Nodo novoNodo = new Nodo(novaPalavraNodo);
-            nodoAtual.filhos.add(novoNodo);
+            nodoAtual.filhos.add(novoNodo);            
+            int posNovoNodo = nodoAtual.filhos.indexOf(novoNodo);
+            nodoAtual.filhos.get(posNovoNodo).posicao = InserirDicionario(verbete);
         }
     }
 
@@ -180,9 +212,39 @@ public class Arvore {
         }
     }
 
+    private int InserirDicionario(Verbete verbete){
+
+        int posicao = 0;
+
+        if(!dicionario.isEmpty()){
+
+            int n = dicionario.size();
+            for (int i = 0; i<n; i++) {
+
+                if(dicionario.get(i) == null){
+                    dicionario.set(i,verbete);
+                    posicao = i;
+                    System.out.println("Salvo na posição:" + posicao);
+                    return posicao;
+                }
+            }
+
+            if(!dicionario.contains(verbete)){
+                dicionario.add(verbete);
+                return posicao = dicionario.size()-1;
+            }
+           
+        } else {
+            dicionario.add(verbete);
+            return posicao = dicionario.size()-1;
+        }
+
+        return -1;
+    }
     public static void main(String[] args) {
 
         Arvore arvore = new Arvore();
+        Verbete verbete = new Verbete();
 
         Scanner entrada = new Scanner(System.in);
         String comando = "";
@@ -202,8 +264,17 @@ public class Arvore {
             if(comando.equals("i")){
 
                 String palavra = entrada.nextLine();
+                String classe = entrada.nextLine();
+                int qtdTraducoes = entrada.nextInt();
 
-                arvore.Inserir(palavra);
+                verbete.palavraOrigem = palavra;
+                verbete.classePalavra = classe;
+
+                for (int i = 0; i<qtdTraducoes; i++) {
+                    verbete.traducoes[i] = entrada.nextLine();
+                }
+
+                arvore.Inserir(palavra, verbete);
 
             }
 
