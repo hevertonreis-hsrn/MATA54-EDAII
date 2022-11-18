@@ -201,8 +201,7 @@ public class Arvore {
 
             if(comando.equals("i")){
 
-                String palavra = "";
-                palavra = entrada.nextLine();
+                String palavra = entrada.nextLine();
 
                 arvore.Inserir(palavra);
 
@@ -210,8 +209,7 @@ public class Arvore {
 
             if(comando.equals("c")){
 
-                String palavra = "";
-                palavra = entrada.nextLine();
+                String palavra = entrada.nextLine();
 
                 boolean resultado = arvore.Buscar(palavra);
 
