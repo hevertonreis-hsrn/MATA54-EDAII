@@ -11,31 +11,13 @@ class Nodo {
 
     public String palavra;
     public List<Nodo> filhos;
-    public int posicao;
-}
-
-class Verbete {
-
-    public Verbete(){
-
-    }
-
-    public Verbete(String palavra, String classe, String[] traducoes){
-        palavraOrigem = palavra;
-        classePalavra = classe;
-        this.traducoes = traducoes;
-    }
-
-    public String palavraOrigem;
-    public String classePalavra;
-    public String[] traducoes = new String[10];
-    
+    public int posicaoDicionario;
 }
 
 public class Arvore {
 
-    private final Nodo raiz;
-    private final List<Verbete> dicionario;
+    private static Nodo raiz;
+    private static List<Verbete> dicionario;
     private final String palavra;
     private final int posicao;
 
@@ -81,7 +63,7 @@ public class Arvore {
                 Nodo nodoNovaPalavra = new Nodo(novaPalavra);
                 nodoAtual.filhos.add(nodoNovaPalavra);
                 int posNovoNodo = nodoAtual.filhos.indexOf(nodoNovaPalavra);
-                nodoAtual.filhos.get(posNovoNodo).posicao = InserirDicionario(verbete);
+                nodoAtual.filhos.get(posNovoNodo).posicaoDicionario = Dicionario.InserirDicionario(verbete, dicionario);
             }
 
         } else if(combinacoes < tamanhoPalavra){
@@ -94,6 +76,7 @@ public class Arvore {
 
             Nodo novoNodoPalavraAnterior = new Nodo(ramoPalavraAnterior);
             novoNodoPalavraAnterior.filhos.addAll(nodoAtual.filhos);
+            novoNodoPalavraAnterior.posicaoDicionario = nodoAtual.posicaoDicionario;
 
             nodoAtual.filhos.clear();
             nodoAtual.filhos.add(novoNodoPalavraAnterior);
@@ -101,7 +84,7 @@ public class Arvore {
             Nodo novoNodoNovaPalavra = new Nodo(ramoNovaPalavra);
             nodoAtual.filhos.add(novoNodoNovaPalavra);
             int posNovoNodo = nodoAtual.filhos.indexOf(novoNodoNovaPalavra);
-            nodoAtual.filhos.get(posNovoNodo).posicao = InserirDicionario(verbete);
+            nodoAtual.filhos.get(posNovoNodo).posicaoDicionario = Dicionario.InserirDicionario(verbete, dicionario);
             
         } else if (combinacoes > tamanhoTermo ) {
 
@@ -109,11 +92,11 @@ public class Arvore {
             Nodo novoNodo = new Nodo(novaPalavraNodo);
             nodoAtual.filhos.add(novoNodo);            
             int posNovoNodo = nodoAtual.filhos.indexOf(novoNodo);
-            nodoAtual.filhos.get(posNovoNodo).posicao = InserirDicionario(verbete);
+            nodoAtual.filhos.get(posNovoNodo).posicaoDicionario = Dicionario.InserirDicionario(verbete,dicionario);
         }
     }
 
-    private int CombinaCharConsecutivo(String palavra, Nodo nodoAtual){
+    private static int CombinaCharConsecutivo(String palavra, Nodo nodoAtual){
 
         int combinacoes = 0;
         int tamanhoMin;
@@ -174,13 +157,13 @@ public class Arvore {
         } else return combinacoes == tamanhoTermo;
     }
 
-    public void Remover(String palavra){
+    public static void Remover(String palavra){
 
         RemoverRecursivo(palavra, raiz);
 
     }
 
-    private void RemoverRecursivo(String palavra, Nodo nodoAtual) {
+    private static void RemoverRecursivo(String palavra, Nodo nodoAtual) {
 
         int combinacoes = CombinaCharConsecutivo(palavra, nodoAtual);
 
@@ -202,6 +185,7 @@ public class Arvore {
                     if (novaPalavra.equals(filho.palavra)){
                         if ((long) filho.filhos.size() == 0){
 
+                            dicionario.set(filho.posicaoDicionario,null);
                             nodoAtual.filhos.remove(filho);
                             return;
                         }
@@ -212,39 +196,10 @@ public class Arvore {
         }
     }
 
-    private int InserirDicionario(Verbete verbete){
-
-        int posicao = 0;
-
-        if(!dicionario.isEmpty()){
-
-            int n = dicionario.size();
-            for (int i = 0; i<n; i++) {
-
-                if(dicionario.get(i) == null){
-                    dicionario.set(i,verbete);
-                    posicao = i;
-                    System.out.println("Salvo na posição:" + posicao);
-                    return posicao;
-                }
-            }
-
-            if(!dicionario.contains(verbete)){
-                dicionario.add(verbete);
-                return posicao = dicionario.size()-1;
-            }
-           
-        } else {
-            dicionario.add(verbete);
-            return posicao = dicionario.size()-1;
-        }
-
-        return -1;
-    }
+    
     public static void main(String[] args) {
 
         Arvore arvore = new Arvore();
-        Verbete verbete = new Verbete();
 
         Scanner entrada = new Scanner(System.in);
         String comando = "";
@@ -259,6 +214,8 @@ public class Arvore {
 
         while(!comando.equals("e")){
 
+            Verbete verbete = new Verbete();
+
             comando = entrada.nextLine();
 
             if(comando.equals("i")){
@@ -270,6 +227,7 @@ public class Arvore {
                 verbete.palavraOrigem = palavra;
                 verbete.classePalavra = classe;
 
+                entrada.nextLine();
                 for (int i = 0; i<qtdTraducoes; i++) {
                     verbete.traducoes[i] = entrada.nextLine();
                 }
@@ -288,6 +246,12 @@ public class Arvore {
                 resultado ?
                 "Existe na arvore" :
                 "Nao existe na arvore");
+            }
+
+            if(comando.equals("r")){
+
+                String palavra = entrada.nextLine();
+                Remover(palavra);
             }
         }
 
