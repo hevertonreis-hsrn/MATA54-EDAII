@@ -1,6 +1,7 @@
-import java.util.List;
+import java.io.Serializable;
+import java.util.ArrayList;
 
-class Verbete {
+class Verbete implements Serializable{
 
     public Verbete(){
 
@@ -20,9 +21,12 @@ class Verbete {
 
 public class Dicionario {
 
-    public static int InserirDicionario(Verbete verbete, List<Verbete> dicionario){
+    static Armazenamento dadosArquivo = new Armazenamento();
+
+    public static int InserirDicionario(Verbete verbete/*, ArrayList<Verbete> dicionario*/){
 
         int posicao = 0;
+        ArrayList<Object> dicionario = dadosArquivo.lerArquivo("dicionario.dat");
 
         if(!dicionario.isEmpty()){
 
@@ -32,21 +36,26 @@ public class Dicionario {
                 if(dicionario.get(i) == null){
                     dicionario.set(i,verbete);
                     posicao = i;
+                    dadosArquivo.gravarArquivo(dicionario, "dicionario.dat");
                     System.out.println("Salvo na posição:" + posicao);
                     return posicao;
                 }
             }
-
+            /* 
             if(!dicionario.contains(verbete)){
                 dicionario.add(verbete);
+                dadosArquivo.gravarArquivo(dicionario, "dicionario.dat");
                 return dicionario.size() - 1;
-            }
+            }*/
+
+            dicionario.add(verbete);
+            dadosArquivo.gravarArquivo(dicionario, "dicionario.dat");
+            return dicionario.size() - 1;
 
         } else {
             dicionario.add(verbete);
+            dadosArquivo.gravarArquivo(dicionario, "dicionario.dat");
             return dicionario.size() - 1;
         }
-
-        return -1;
     }
 }

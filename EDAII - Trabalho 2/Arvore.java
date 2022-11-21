@@ -17,15 +17,11 @@ class Nodo {
 public class Arvore {
 
     private static Nodo raiz;
-    private static List<Verbete> dicionario;
-    private final String palavra;
-    private final int posicao;
+    //private static ArrayList<Verbete> dicionario;
 
     public Arvore(){
         raiz = new Nodo("");
-        dicionario = new ArrayList<>();
-        palavra = "";
-        posicao = 0;
+        //dicionario = new ArrayList<>();
     }
 
     public void Inserir(String palavra, Verbete verbete){
@@ -63,7 +59,7 @@ public class Arvore {
                 Nodo nodoNovaPalavra = new Nodo(novaPalavra);
                 nodoAtual.filhos.add(nodoNovaPalavra);
                 int posNovoNodo = nodoAtual.filhos.indexOf(nodoNovaPalavra);
-                nodoAtual.filhos.get(posNovoNodo).posicaoDicionario = Dicionario.InserirDicionario(verbete, dicionario);
+                nodoAtual.filhos.get(posNovoNodo).posicaoDicionario = Dicionario.InserirDicionario(verbete/*, dicionario */);
             }
 
         } else if(combinacoes < tamanhoPalavra){
@@ -84,7 +80,7 @@ public class Arvore {
             Nodo novoNodoNovaPalavra = new Nodo(ramoNovaPalavra);
             nodoAtual.filhos.add(novoNodoNovaPalavra);
             int posNovoNodo = nodoAtual.filhos.indexOf(novoNodoNovaPalavra);
-            nodoAtual.filhos.get(posNovoNodo).posicaoDicionario = Dicionario.InserirDicionario(verbete, dicionario);
+            nodoAtual.filhos.get(posNovoNodo).posicaoDicionario = Dicionario.InserirDicionario(verbete/*, dicionario*/);
             
         } else if (combinacoes > tamanhoTermo ) {
 
@@ -92,7 +88,7 @@ public class Arvore {
             Nodo novoNodo = new Nodo(novaPalavraNodo);
             nodoAtual.filhos.add(novoNodo);            
             int posNovoNodo = nodoAtual.filhos.indexOf(novoNodo);
-            nodoAtual.filhos.get(posNovoNodo).posicaoDicionario = Dicionario.InserirDicionario(verbete,dicionario);
+            nodoAtual.filhos.get(posNovoNodo).posicaoDicionario = Dicionario.InserirDicionario(verbete/*,dicionario*/);
         }
     }
 
@@ -185,7 +181,11 @@ public class Arvore {
                     if (novaPalavra.equals(filho.palavra)){
                         if ((long) filho.filhos.size() == 0){
 
+                            Armazenamento dadosArquivo = new Armazenamento();
+                            ArrayList<Object> dicionario = dadosArquivo.lerArquivo("dicionario.dat");
                             dicionario.set(filho.posicaoDicionario,null);
+                            dadosArquivo.gravarArquivo(dicionario, "dicionario.dat");
+                            
                             nodoAtual.filhos.remove(filho);
                             return;
                         }
