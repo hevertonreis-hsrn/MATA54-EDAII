@@ -8,7 +8,7 @@ import java.util.ArrayList;
 
 public class Armazenamento {
 
-    public void gravarArquivo(ArrayList<Object> dicionario, String nomeArquivo){
+    public void gravarListaArquivo(ArrayList<Object> dicionario, String nomeArquivo){
 
         File arquivo = new File(nomeArquivo);
 
@@ -29,7 +29,7 @@ public class Armazenamento {
 
     }
 
-    public ArrayList<Object> lerArquivo(String nomeArquivo){
+    public ArrayList<Object> lerListaArquivo(String nomeArquivo){
 
         Object dados = null;
 
@@ -45,9 +45,9 @@ public class Armazenamento {
             }
             
         } catch (IOException erro1) {
-            System.out.println("Erro: " + erro1.getMessage());
+            return null;
         } catch(ClassNotFoundException erro2) {
-            System.out.println("Erro: " + erro2.getMessage());
+            return null;
         }
 
         return (ArrayList<Object>) dados;
