@@ -122,12 +122,12 @@ public class Arvore {
         return combinacoes;
     }
 
-    public boolean Buscar(String palavra){
+    public Nodo Buscar(String palavra){
         
         return BuscarRecursivo(palavra, raiz);
     }
 
-    private boolean BuscarRecursivo(String palavra, Nodo nodoAtual) {
+    private Nodo BuscarRecursivo(String palavra, Nodo nodoAtual) {
 
         int combinacoes = CombinaCharConsecutivo(palavra, nodoAtual);
 
@@ -150,9 +150,11 @@ public class Arvore {
                     return BuscarRecursivo(novaPalavra, filho);
                 }
             }
-
-            return false;
-        } else return combinacoes == tamanhoTermo;
+            //return false;
+            return null;
+        } else {
+            return nodoAtual;
+        } //return combinacoes == tamanhoTermo;
     }
 
     public static void Remover(String palavra){
@@ -240,16 +242,89 @@ public class Arvore {
 
             }
 
+            if(comando.equals("l")){
+
+                //String ordem = entrada.nextLine();
+                
+                Armazenamento dadosArquivo = new Armazenamento();
+                ArrayList<Object> dadosDicionario = dadosArquivo.lerListaArquivo("dicionario.dat");
+                ArrayList<Verbete> dicionario = new ArrayList<>();
+                
+                for (Object dado : dadosDicionario) {
+                    dicionario.add((Verbete)dado);
+                }
+
+                int tamanhoLista = dicionario.size();
+
+                for (int i = 0; i < tamanhoLista; i++) {
+                    for (int j = i + 1; j < tamanhoLista; j++) {
+                        
+                        if (dicionario.get(i).palavraOrigem.compareTo(dicionario.get(j).palavraOrigem) > 0) {
+                            
+                            String temp = dicionario.get(i).palavraOrigem;
+                            dicionario.get(i).palavraOrigem = dicionario.get(j).palavraOrigem;
+                            dicionario.get(j).palavraOrigem = temp;
+                        }
+                    }
+                }
+
+                System.out.println();
+
+            }
+
+            if(comando.equals("t")){
+
+                String palavra = entrada.nextLine();
+                Nodo resultado = arvore.Buscar(palavra);
+                
+                if (resultado == null) {
+                    System.out.println("palavra inexistente no dicionario: " + palavra);
+                } else {
+
+                    int posicao = resultado.posicaoDicionario;
+
+                    Armazenamento dadosArquivo = new Armazenamento();
+                    ArrayList<Object> dicionario = dadosArquivo.lerListaArquivo("dicionario.dat");
+                    Verbete termo = (Verbete) dicionario.get(posicao);
+
+                    System.out.println("traducoes da palavra: " + palavra);
+                    for(int i = 0; i < termo.traducoes.length; i ++){
+
+                        String traducao = termo.traducoes[i];
+                        if(traducao != null)
+                            System.out.println(traducao);
+                    }
+                }
+            }
+
             if(comando.equals("c")){
 
                 String palavra = entrada.nextLine();
+                Nodo resultado = arvore.Buscar(palavra);
+                
+                if (resultado == null) {
+                    System.out.println("palavra inexistente no dicionario: " + palavra);
+                } else {
 
-                boolean resultado = arvore.Buscar(palavra);
+                    int posicao = resultado.posicaoDicionario;
 
-                System.out.println(
-                resultado ?
-                "Existe na arvore" :
-                "Nao existe na arvore");
+                    Armazenamento dadosArquivo = new Armazenamento();
+                    ArrayList<Object> dicionario = dadosArquivo.lerListaArquivo("dicionario.dat");
+                    Verbete termo = (Verbete) dicionario.get(posicao);
+
+                    String classe = "";
+
+                    if (termo.classePalavra.equals("s")) {
+                        classe = "substantivo";
+                    } else if (termo.classePalavra.equals("a")) {
+                        classe = "adjetivo";
+                    } else if (termo.classePalavra.equals("v")) {
+                        classe = "verbo";
+                    }
+
+                    System.out.println("classe da palavra: " + palavra + " : " + classe);
+                    
+                }
             }
 
             if(comando.equals("r")){
@@ -257,6 +332,12 @@ public class Arvore {
                 String palavra = entrada.nextLine();
                 Remover(palavra);
             }
+
+            if (comando.equals("p")) {
+                
+            }
+
+            
         }
 
         entrada.close();
