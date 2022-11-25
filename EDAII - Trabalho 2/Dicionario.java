@@ -51,11 +51,7 @@ public class Dicionario {
             dadosArquivo.gravarListaArquivo(dicionario, "dicionario.dat");
             return dicionario.size() - 1;
         }
-        /*} else {
-            dicionario.add(verbete);
-            dadosArquivo.gravarArquivo(dicionario, "dicionario.dat");
-            return dicionario.size() - 1;
-        }*/
+
         return -1;
     }
 }

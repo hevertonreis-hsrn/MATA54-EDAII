@@ -1,8 +1,9 @@
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
-class Nodo {
+class Nodo implements Serializable {
 
     public Nodo(String palavra){
         this.palavra = palavra;
@@ -19,7 +20,7 @@ public class Arvore {
     private static Nodo raiz;
 
     public Arvore(){
-        raiz = new Nodo("");
+        raiz = (Nodo) Armazenamento.lerObjetoArquivo("arvore.dat");
     }
 
     public void Inserir(String palavra, Verbete verbete){
@@ -58,6 +59,7 @@ public class Arvore {
                 nodoAtual.filhos.add(nodoNovaPalavra);
                 int posNovoNodo = nodoAtual.filhos.indexOf(nodoNovaPalavra);
                 nodoAtual.filhos.get(posNovoNodo).posicaoDicionario = Dicionario.InserirDicionario(verbete);
+                Armazenamento.gravarObjetoArquivo(raiz,"arvore.dat");
             }
 
         } else if(combinacoes < tamanhoPalavra){
@@ -79,6 +81,7 @@ public class Arvore {
             nodoAtual.filhos.add(novoNodoNovaPalavra);
             int posNovoNodo = nodoAtual.filhos.indexOf(novoNodoNovaPalavra);
             nodoAtual.filhos.get(posNovoNodo).posicaoDicionario = Dicionario.InserirDicionario(verbete);
+            Armazenamento.gravarObjetoArquivo(raiz,"arvore.dat");
             
         } else if (combinacoes > tamanhoTermo ) {
 
@@ -87,6 +90,7 @@ public class Arvore {
             nodoAtual.filhos.add(novoNodo);            
             int posNovoNodo = nodoAtual.filhos.indexOf(novoNodo);
             nodoAtual.filhos.get(posNovoNodo).posicaoDicionario = Dicionario.InserirDicionario(verbete);
+            Armazenamento.gravarObjetoArquivo(raiz,"arvore.dat");
         }
     }
 
@@ -185,6 +189,8 @@ public class Arvore {
                             dadosArquivo.gravarListaArquivo(dicionario, "dicionario.dat");
                             
                             nodoAtual.filhos.remove(filho);
+
+                            Armazenamento.gravarObjetoArquivo(raiz,"arvore.dat");
                             return;
                         }
                     }
