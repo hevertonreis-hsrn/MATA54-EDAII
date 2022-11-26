@@ -122,12 +122,12 @@ public class Arvore {
         return combinacoes;
     }
 
-    public Nodo Buscar(String palavra){
+    public static Nodo Buscar(String palavra){
         
         return BuscarRecursivo(palavra, raiz);
     }
 
-    private Nodo BuscarRecursivo(String palavra, Nodo nodoAtual) {
+    private static Nodo BuscarRecursivo(String palavra, Nodo nodoAtual) {
 
         int combinacoes = CombinaCharConsecutivo(palavra, nodoAtual);
 
@@ -237,14 +237,22 @@ public class Arvore {
                 for (int i = 0; i<qtdTraducoes; i++) {
                     verbete.traducoes[i] = entrada.nextLine();
                 }
+                
+                Nodo verificaNodo = new Nodo("");
+                verificaNodo = Buscar(palavra);
 
-                arvore.Inserir(palavra, verbete);
+                if (verificaNodo == null) {
+                    arvore.Inserir(palavra, verbete);
+                    System.out.println("’palavra inserida no dicionario: " + palavra);
+                } else {
+                    System.out.println("palavra ja existente: " + palavra);
+                }
 
             }
 
             if(comando.equals("l")){
 
-                //String ordem = entrada.nextLine();
+                String ordem = entrada.nextLine();
                 
                 Armazenamento dadosArquivo = new Armazenamento();
                 ArrayList<Object> dadosDicionario = dadosArquivo.lerListaArquivo("dicionario.dat");
@@ -268,7 +276,17 @@ public class Arvore {
                     }
                 }
 
-                System.out.println();
+                if (ordem.equals("c")) {
+                    for (int i = 0; i < tamanhoLista; i++) {
+                        System.out.println(dicionario.get(i).palavraOrigem);
+                    }
+                }
+
+                if (ordem.equals("d")) {
+                    for (int i = tamanhoLista-1; i >= 0; i--) {
+                        System.out.println(dicionario.get(i).palavraOrigem);
+                    }
+                }
 
             }
 
